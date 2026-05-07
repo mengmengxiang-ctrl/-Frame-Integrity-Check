@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Frame Integrity Check — Interactive Guide</title>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
   <style>
@@ -23,20 +24,38 @@
 
     * { box-sizing: border-box; }
 
-    body {
+    html, body {
       margin: 0;
-      width: 1920px;
-      height: 1080px;
+      padding: 0;
+      width: 100%;
+      min-height: 100vh;
+    }
+
+    body {
       color: var(--ink);
       background: #f3f6fa;
       overflow: hidden;
+      display: grid;
+      place-items: center;
     }
 
-    .root {
+    /* Wrapper that reserves the scaled-down area in the viewport.
+       JS sets its width/height to (1920 * scale, 1080 * scale). */
+    .stage {
       position: relative;
       width: 1920px;
       height: 1080px;
+      flex-shrink: 0;
+    }
+
+    .root {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 1920px;
+      height: 1080px;
       padding: 32px;
+      transform-origin: top left;
       background:
         linear-gradient(180deg, #fbfcff, #eef3f8);
     }
@@ -575,6 +594,7 @@
   </style>
 </head>
 <body>
+  <div id="stage" class="stage">
   <div id="root" class="root" data-composition-id="workflow-tutorial" data-start="0" data-width="1920" data-height="1080" data-duration="18">
     <div class="shell">
       <header class="topbar">
@@ -677,8 +697,29 @@
       <div class="note n4"><span class="key">Enter</span><h3>Quick submit</h3><p>Press <em>Enter</em> to save and load the next task. Aim for one decision every few seconds — speed beats over-analysis.</p></div>
     </div>
   </div>
+  </div>
 
   <script>
+    // Scale the 1920x1080 design canvas to fit any viewport while preserving
+    // the original layout (so all the absolutely-positioned coach notes and
+    // highlight boxes keep working). The .stage wrapper reserves the scaled
+    // size in normal flow so the body can center it.
+    function fitStage() {
+      const stage = document.getElementById('stage');
+      const root  = document.getElementById('root');
+      if (!stage || !root) return;
+      const scale = Math.min(
+        window.innerWidth  / 1920,
+        window.innerHeight / 1080
+      );
+      root.style.transform = 'scale(' + scale + ')';
+      stage.style.width  = (1920 * scale) + 'px';
+      stage.style.height = (1080 * scale) + 'px';
+    }
+    fitStage();
+    window.addEventListener('resize', fitStage);
+    window.addEventListener('load', fitStage);
+
     window.__timelines = window.__timelines || {};
     const tl = gsap.timeline({ paused: true });
     const steps = [

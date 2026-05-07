@@ -1,0 +1,710 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Frame Integrity Check — Interactive Guide</title>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <style>
+    :root {
+      --ink: #0f172a;
+      --muted: #64748b;
+      --line: #d9e1ea;
+      --panel: #ffffff;
+      --blue: #635bff;
+      --blue-soft: #eeefff;
+      --green: #15975b;
+      --green-soft: #e7f9ec;
+      --amber: #f2a51d;
+      --amber-soft: #fff4cf;
+      --red: #e84f4f;
+      --red-soft: #fff1f1;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      width: 1920px;
+      height: 1080px;
+      color: var(--ink);
+      background: #f3f6fa;
+      overflow: hidden;
+    }
+
+    .root {
+      position: relative;
+      width: 1920px;
+      height: 1080px;
+      padding: 32px;
+      background:
+        linear-gradient(180deg, #fbfcff, #eef3f8);
+    }
+
+    .shell {
+      position: absolute;
+      inset: 32px;
+      display: grid;
+      grid-template-rows: 92px 1fr;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      overflow: hidden;
+      background: var(--panel);
+      box-shadow: 0 34px 90px rgba(31, 41, 55, 0.15);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      border-bottom: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .title { display: grid; gap: 5px; }
+    .title strong { font-size: 30px; line-height: 1; font-weight: 950; }
+    .title span { color: var(--muted); font-size: 16px; font-weight: 750; }
+
+    .badges {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .badge {
+      height: 42px;
+      padding: 0 18px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: #0f172a;
+      font-weight: 900;
+      font-size: 15px;
+    }
+
+    .badge.alt {
+      background: var(--green-soft);
+      color: #15803d;
+    }
+
+    .content {
+      display: grid;
+      grid-template-columns: 360px 1fr 432px;
+      min-height: 0;
+    }
+
+    /* ---- Workflow column ---- */
+    .workflow {
+      padding: 28px 24px;
+      border-right: 1px solid var(--line);
+      background: #fbfcff;
+      display: grid;
+      align-content: start;
+      gap: 12px;
+    }
+
+    .workflow h2,
+    .qa h2 {
+      margin: 0 0 6px;
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .step {
+      display: grid;
+      grid-template-columns: 38px 1fr;
+      gap: 12px;
+      padding: 14px;
+      min-height: 86px;
+      border-radius: 14px;
+      border: 1px solid #dbe4ef;
+      background: #fff;
+      color: #425066;
+    }
+
+    .step-num {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border-radius: 10px;
+      color: #fff;
+      background: #0f172a;
+      font-weight: 950;
+    }
+
+    .step strong {
+      display: block;
+      color: var(--ink);
+      font-size: 17px;
+      margin-bottom: 5px;
+    }
+
+    .step span {
+      font-size: 14px;
+      line-height: 1.3;
+      font-weight: 680;
+    }
+
+    .step.active {
+      border-color: #b8c0ff;
+      background: var(--blue-soft);
+      box-shadow: 0 16px 35px rgba(99, 91, 255, 0.14);
+    }
+
+    .ignore {
+      margin-top: 6px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px dashed #cbd5e1;
+      background: #f8fafc;
+      color: #475569;
+      font-size: 13px;
+      font-weight: 760;
+      line-height: 1.35;
+    }
+    .ignore strong { color: #0f172a; display: block; margin-bottom: 4px; font-size: 14px; }
+
+    /* ---- Center task pane ---- */
+    .task {
+      position: relative;
+      display: grid;
+      grid-template-rows: 76px 1fr 72px;
+      background: #fff;
+    }
+
+    .task-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      border-bottom: 1px solid var(--line);
+      color: var(--muted);
+      font-weight: 800;
+      font-size: 18px;
+    }
+
+    .focus-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: var(--blue-soft);
+      color: #4338ca;
+      font-size: 14px;
+      font-weight: 900;
+    }
+    .focus-tag::before {
+      content: "";
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--blue);
+    }
+
+    .videos {
+      padding: 28px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      min-height: 0;
+    }
+
+    .video {
+      position: relative;
+      min-height: 0;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #121921;
+      border: 2px solid #0c1118;
+    }
+
+    .video::before {
+      content: "";
+      position: absolute;
+      inset: 28px;
+      border-radius: 10px;
+      background:
+        linear-gradient(90deg, transparent 0 46%, rgba(255,255,255,0.14) 46% 52%, transparent 52%),
+        linear-gradient(180deg, rgba(255,255,255,0.06), transparent 48%, rgba(255,255,255,0.05)),
+        repeating-linear-gradient(0deg, rgba(255,255,255,0.08) 0 2px, transparent 2px 46px);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .video::after {
+      content: "reviewable video";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      color: rgba(255,255,255,0.55);
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .video-label {
+      position: absolute;
+      z-index: 4;
+      left: 18px;
+      top: 18px;
+      padding: 8px 12px;
+      border-radius: 10px;
+      background: var(--blue);
+      color: #fff;
+      font-weight: 950;
+    }
+
+    .video.recon .video-label {
+      background: #0f172a;
+    }
+
+    .video.recon .focus-ring {
+      position: absolute;
+      inset: 0;
+      border: 3px solid transparent;
+      border-radius: 14px;
+      box-shadow: inset 0 0 0 3px rgba(99, 91, 255, 0.55);
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    .video .eye {
+      position: absolute;
+      z-index: 4;
+      right: 16px;
+      top: 16px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(99, 91, 255, 0.95);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 950;
+      letter-spacing: 0.04em;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      border-top: 1px solid var(--line);
+      background: #fbfcff;
+    }
+
+    .control {
+      height: 40px;
+      padding: 0 14px;
+      border-radius: 10px;
+      display: grid;
+      grid-auto-flow: column;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid #d5dfeb;
+      background: #edf3fb;
+      color: #2c3a4f;
+      font-weight: 880;
+      font-size: 13px;
+    }
+
+    .kbd {
+      display: inline-grid;
+      place-items: center;
+      min-width: 26px;
+      height: 26px;
+      padding: 0 7px;
+      border-radius: 6px;
+      border: 1px solid #c7d2e2;
+      background: #fff;
+      color: #0f172a;
+      font-size: 12px;
+      font-weight: 950;
+      box-shadow: inset 0 -2px 0 rgba(15, 23, 42, 0.06);
+    }
+
+    .control.yes { background: #e7f9ec; border-color: #8ddb9c; color: #15803d; }
+    .control.no { background: #f1f5f9; border-color: #cbd5e1; color: #334155; }
+    .control.invalid { background: var(--red-soft); border-color: #f5b5b5; color: #b32626; }
+    .control.save { background: var(--blue); border-color: var(--blue); color: #fff; }
+    .control.save .kbd { background: rgba(255,255,255,0.2); border-color: transparent; color: #fff; box-shadow: none; }
+
+    /* ---- QA column ---- */
+    .qa {
+      padding: 24px 22px;
+      border-left: 1px solid var(--line);
+      display: grid;
+      grid-template-rows: auto auto auto 1fr auto;
+      gap: 14px;
+    }
+
+    .qa-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 20px;
+      font-weight: 950;
+    }
+
+    .pill {
+      border-radius: 999px;
+      background: var(--green-soft);
+      color: #15803d;
+      padding: 5px 10px;
+      font-size: 14px;
+      font-weight: 950;
+    }
+
+    .utility {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .utility div {
+      height: 50px;
+      border-radius: 12px;
+      display: grid;
+      grid-auto-flow: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-weight: 950;
+      font-size: 14px;
+    }
+
+    .review {
+      color: #8a5b00;
+      background: var(--amber-soft);
+      border: 1px solid #f1d781;
+    }
+
+    .invalid {
+      color: #b32626;
+      background: var(--red-soft);
+      border: 1px solid #f5b5b5;
+    }
+
+    .questions {
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .question {
+      padding: 14px 16px;
+      border-radius: 14px;
+      border: 2px solid #dce5ef;
+      background: #fff;
+      display: grid;
+      gap: 8px;
+    }
+
+    .question .q-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .question strong {
+      font-size: 17px;
+      line-height: 1.2;
+    }
+
+    .question span.hint {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 760;
+      line-height: 1.35;
+    }
+
+    .answer-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .answer {
+      height: 38px;
+      border-radius: 10px;
+      display: grid;
+      grid-auto-flow: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-weight: 920;
+      font-size: 13px;
+      border: 1px solid;
+    }
+
+    .answer.yes { background: #e7f9ec; border-color: #8ddb9c; color: #15803d; }
+    .answer.no { background: #f1f5f9; border-color: #cbd5e1; color: #334155; }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .chip {
+      padding: 4px 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 900;
+      border: 1px solid;
+    }
+
+    .chip.fused { background: #fdf2f8; color: #be185d; border-color: #f9a8d4; }
+    .chip.broken { background: #fef3c7; color: #92400e; border-color: #fcd34d; }
+    .chip.smearing { background: #ede9fe; color: #5b21b6; border-color: #c4b5fd; }
+
+    .question.active {
+      border-color: #8ddb9c;
+      background: var(--green-soft);
+    }
+
+    .save {
+      display: grid;
+      gap: 10px;
+      padding: 16px;
+      border-radius: 16px;
+      border: 1px solid #d7e4fb;
+      background: #eef4ff;
+      font-weight: 820;
+    }
+
+    .save strong { font-size: 16px; color: #0f172a; }
+    .save .save-hint { font-size: 13px; color: var(--muted); font-weight: 760; }
+
+    .save-button {
+      height: 54px;
+      display: grid;
+      grid-auto-flow: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      border-radius: 12px;
+      background: var(--blue);
+      color: #fff;
+      font-size: 18px;
+      font-weight: 950;
+    }
+    .save-button .kbd { background: rgba(255,255,255,0.22); color: #fff; border-color: transparent; box-shadow: none; }
+
+    /* ---- Coach overlays ---- */
+    .coach {
+      position: absolute;
+      left: 386px;
+      right: 454px;
+      top: 130px;
+      z-index: 30;
+      display: grid;
+      pointer-events: none;
+    }
+
+    .note {
+      position: absolute;
+      width: 540px;
+      padding: 22px 24px;
+      border-radius: 20px;
+      background: #0f172a;
+      color: #fff;
+      box-shadow: 0 28px 70px rgba(15, 23, 42, 0.36);
+      opacity: 0;
+      transform: translateY(12px);
+    }
+
+    .note .key {
+      display: inline-grid;
+      min-width: 56px;
+      height: 52px;
+      padding: 0 16px;
+      place-items: center;
+      border-radius: 11px;
+      background: #fff;
+      color: #0f172a;
+      font-size: 24px;
+      font-weight: 950;
+      margin-bottom: 12px;
+      box-shadow: inset 0 -3px 0 rgba(0,0,0,0.16);
+    }
+
+    .note h3 {
+      margin: 0 0 8px;
+      font-size: 24px;
+      line-height: 1.1;
+    }
+
+    .note p {
+      margin: 0;
+      color: #dbe4ee;
+      font-size: 18px;
+      line-height: 1.36;
+      font-weight: 760;
+    }
+
+    .note p em {
+      color: #fff;
+      font-style: normal;
+      font-weight: 880;
+    }
+
+    .n0 { left: 1008px; top: 176px; }
+    .n1 { left: 704px; top: 232px; }
+    .n2 { left: 296px; top: 690px; }
+    .n3 { left: 880px; top: 360px; }
+    .n4 { left: 988px; top: 690px; }
+
+    .highlight {
+      position: absolute;
+      z-index: 22;
+      border: 6px solid #ffcc4d;
+      border-radius: 18px;
+      box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.2), 0 0 30px rgba(255, 204, 77, 0.74);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .h-invalid { left: 1684px; top: 186px; width: 200px; height: 64px; }
+    .h-q1 { left: 1500px; top: 270px; width: 384px; height: 130px; }
+    .h-play { left: 358px; top: 206px; width: 1110px; height: 686px; }
+    .h-q2 { left: 1500px; top: 410px; width: 384px; height: 158px; }
+    .h-save { left: 1500px; top: 868px; width: 384px; height: 150px; }
+  </style>
+</head>
+<body>
+  <div id="root" class="root" data-composition-id="workflow-tutorial" data-start="0" data-width="1920" data-height="1080" data-duration="18">
+    <div class="shell">
+      <header class="topbar">
+        <div class="title">
+          <strong>Frame Integrity Check — interactive guide</strong>
+          <span>Compare Raw A vs Recon B. Flag only severe failures introduced by reconstruction.</span>
+        </div>
+        <div class="badges">
+          <div class="badge alt">~99% are normal</div>
+          <div class="badge">Move fast — 2–5s playback</div>
+        </div>
+      </header>
+      <main class="content">
+        <aside class="workflow">
+          <h2>Decision order</h2>
+          <div class="step s0 active"><div class="step-num">0</div><div><strong>Reviewable?</strong><span>If unplayable, missing, or unsafe — press <b>I</b> and stop.</span></div></div>
+          <div class="step s1"><div class="step-num">1</div><div><strong>Instant first-frame check</strong><span>Scan thumbnails. If A and B match, keep Q1 = Yes.</span></div></div>
+          <div class="step s2"><div class="step-num">2</div><div><strong>Play once — focus on Recon B</strong><span>Hit <b>Space</b>. Watch B for 2–5s. Don't over-analyze.</span></div></div>
+          <div class="step s3"><div class="step-num">3</div><div><strong>Spot visual disasters</strong><span>Fused (ghosting), Broken (glitch), Smearing.</span></div></div>
+          <div class="step s4"><div class="step-num">4</div><div><strong>Quick submit</strong><span>Looks clean? Press <b>Enter</b> for next task.</span></div></div>
+          <div class="ignore">
+            <strong>Ignore</strong>
+            Minor blur · slight quality drop · thin black borders · small crops
+          </div>
+        </aside>
+
+        <section class="task">
+          <div class="task-head">
+            <span>Task 1 / 5000</span>
+            <span class="focus-tag">Eyes on Recon B</span>
+          </div>
+          <div class="videos">
+            <div class="video raw"><span class="video-label">A · Raw</span></div>
+            <div class="video recon">
+              <span class="video-label">B · Recon</span>
+              <span class="eye">FOCUS</span>
+              <div class="focus-ring"></div>
+            </div>
+          </div>
+          <div class="controls">
+            <div class="control"><span class="kbd">Space</span><span>Play / Pause</span></div>
+            <div class="control yes"><span class="kbd">;</span><span>Yes</span></div>
+            <div class="control no"><span class="kbd">'</span><span>No</span></div>
+            <div class="control"><span class="kbd">1</span><span>Prev Q</span></div>
+            <div class="control"><span class="kbd">2</span><span>Next Q</span></div>
+            <div class="control invalid"><span class="kbd">I</span><span>Invalid</span></div>
+            <div class="control save"><span class="kbd">Enter</span><span>Save &amp; Next</span></div>
+          </div>
+        </section>
+
+        <aside class="qa">
+          <div class="qa-title">Frame Integrity Questions <span class="pill">2 / 2</span></div>
+          <div class="utility">
+            <div class="review">Review <span class="kbd">R</span></div>
+            <div class="invalid">Invalid <span class="kbd">I</span></div>
+          </div>
+          <div class="questions">
+            <div class="question q1 active">
+              <div class="q-head"><strong>Q1. First frame matches</strong></div>
+              <span class="hint">Compare static thumbnails before playback. Tiny crops or thin black borders are OK.</span>
+              <div class="answer-row">
+                <div class="answer yes"><span class="kbd">;</span><span>Yes — match</span></div>
+                <div class="answer no"><span class="kbd">'</span><span>No</span></div>
+              </div>
+            </div>
+            <div class="question q2">
+              <div class="q-head"><strong>Q2. Recon has broken frames</strong></div>
+              <span class="hint">Severe failures only — flag what Recon B introduces.</span>
+              <div class="chips">
+                <span class="chip fused">Fused · ghosting</span>
+                <span class="chip broken">Broken · glitch</span>
+                <span class="chip smearing">Smearing</span>
+              </div>
+              <div class="answer-row">
+                <div class="answer yes"><span class="kbd">;</span><span>Yes — broken</span></div>
+                <div class="answer no"><span class="kbd">'</span><span>No — clean (99%)</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="save">
+            <strong>My Annotation</strong>
+            <span class="save-hint">Complete both answers before saving. Default Q2 → No when playback is clean.</span>
+            <div class="save-button"><span class="kbd">Enter</span><span>Save &amp; Next</span></div>
+          </div>
+        </aside>
+      </main>
+    </div>
+
+    <div class="highlight h-invalid"></div>
+    <div class="highlight h-q1"></div>
+    <div class="highlight h-play"></div>
+    <div class="highlight h-q2"></div>
+    <div class="highlight h-save"></div>
+
+    <div class="coach">
+      <div class="note n0"><span class="key">I</span><h3>Start with reviewability</h3><p>If either video is missing, unplayable, wrong, or unsafe — press <em>I</em> to mark Invalid and stop.</p></div>
+      <div class="note n1"><span class="key">;</span><h3>Instant first-frame check</h3><p>Compare the two thumbnails before playback. If A and B clearly match, keep <em>Q1 = Yes</em>. Ignore tiny crops or thin borders.</p></div>
+      <div class="note n2"><span class="key">Space</span><h3>Play once — focus on Recon B</h3><p>Watch the right video for <em>2–5 seconds</em>. You're scanning for visual disasters, not minor quality differences.</p></div>
+      <div class="note n3"><span class="key">'</span><h3>Spot only Fused / Broken / Smearing</h3><p>Looks clean? Press <em>'</em> for No (the ~99% case). Press <em>;</em> for Yes only when B clearly shows ghosting, glitch, or melting.</p></div>
+      <div class="note n4"><span class="key">Enter</span><h3>Quick submit</h3><p>Press <em>Enter</em> to save and load the next task. Aim for one decision every few seconds — speed beats over-analysis.</p></div>
+    </div>
+  </div>
+
+  <script>
+    window.__timelines = window.__timelines || {};
+    const tl = gsap.timeline({ paused: true });
+    const steps = [
+      [".s0", ".n0", ".h-invalid", ".q1", 0],
+      [".s1", ".n1", ".h-q1", ".q1", 3.4],
+      [".s2", ".n2", ".h-play", ".q1", 6.8],
+      [".s3", ".n3", ".h-q2", ".q2", 10.2],
+      [".s4", ".n4", ".h-save", ".q2", 13.6],
+    ];
+
+    steps.forEach(([step, note, highlight, question, at]) => {
+      tl.set(".step", { className: "step" }, at);
+      tl.set(step, { className: "step active" }, at);
+      tl.set(".question", { className: "question" }, at);
+      tl.set(question, { className: `question ${question.slice(1)} active` }, at);
+      tl.to(highlight, { opacity: 1, duration: 0.2 }, at + 0.05);
+      tl.to(note, { opacity: 1, y: 0, duration: 0.24 }, at + 0.12);
+      tl.to([note, highlight], { opacity: 0, duration: 0.24 }, at + 2.85);
+    });
+
+    window.__timelines["workflow-tutorial"] = tl;
+
+    // Auto-play the timeline on load so the guide cycles through all five steps.
+    window.addEventListener("load", () => {
+      tl.play(0);
+    });
+  </script>
+</body>
+</html>

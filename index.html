@@ -110,7 +110,7 @@
 
     .content {
       display: grid;
-      grid-template-columns: 360px 1fr 432px;
+      grid-template-columns: 1fr 432px;
       min-height: 0;
     }
 
@@ -586,11 +586,13 @@
       pointer-events: none;
     }
 
-    .h-invalid { left: 1684px; top: 186px; width: 200px; height: 64px; }
-    .h-q1 { left: 1500px; top: 270px; width: 384px; height: 130px; }
-    .h-play { left: 358px; top: 206px; width: 1110px; height: 686px; }
-    .h-q2 { left: 1500px; top: 410px; width: 384px; height: 158px; }
-    .h-save { left: 1500px; top: 868px; width: 384px; height: 150px; }
+    /* Highlight rectangles in 1920x1080 coordinate space.
+       Computed from the actual layout so each box wraps its target tightly. */
+    .h-invalid { left: 1700px; top: 188px; width: 184px; height: 60px; }
+    .h-q1      { left: 1478px; top: 270px; width: 410px; height: 132px; }
+    .h-play    { left: 52px;   top: 220px; width: 1384px; height: 736px; }
+    .h-q2      { left: 1478px; top: 416px; width: 410px; height: 196px; }
+    .h-save    { left: 1478px; top: 870px; width: 410px; height: 154px; }
   </style>
 </head>
 <body>
@@ -602,25 +604,8 @@
           <strong>Frame Integrity Check — interactive guide</strong>
           <span>Compare Raw A vs Recon B. Flag only severe failures introduced by reconstruction.</span>
         </div>
-        <div class="badges">
-          <div class="badge alt">~99% are normal</div>
-          <div class="badge">Move fast — 2–5s playback</div>
-        </div>
       </header>
       <main class="content">
-        <aside class="workflow">
-          <h2>Decision order</h2>
-          <div class="step s0 active"><div class="step-num">0</div><div><strong>Reviewable?</strong><span>If unplayable, missing, or unsafe — press <b>I</b> and stop.</span></div></div>
-          <div class="step s1"><div class="step-num">1</div><div><strong>Instant first-frame check</strong><span>Scan thumbnails. If A and B match, keep Q1 = Yes.</span></div></div>
-          <div class="step s2"><div class="step-num">2</div><div><strong>Play once — focus on Recon B</strong><span>Hit <b>Space</b>. Watch B for 2–5s. Don't over-analyze.</span></div></div>
-          <div class="step s3"><div class="step-num">3</div><div><strong>Spot visual disasters</strong><span>Fused (ghosting), Broken (glitch), Smearing.</span></div></div>
-          <div class="step s4"><div class="step-num">4</div><div><strong>Quick submit</strong><span>Looks clean? Press <b>Enter</b> for next task.</span></div></div>
-          <div class="ignore">
-            <strong>Ignore</strong>
-            Minor blur · slight quality drop · thin black borders · small crops
-          </div>
-        </aside>
-
         <section class="task">
           <div class="task-head">
             <span>Task 1 / 5000</span>
@@ -670,7 +655,7 @@
               </div>
               <div class="answer-row">
                 <div class="answer yes"><span class="kbd">;</span><span>Yes — broken</span></div>
-                <div class="answer no"><span class="kbd">'</span><span>No — clean (99%)</span></div>
+                <div class="answer no"><span class="kbd">'</span><span>No — clean</span></div>
               </div>
             </div>
           </div>

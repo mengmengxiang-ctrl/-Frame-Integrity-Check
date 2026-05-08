@@ -570,11 +570,14 @@
       font-weight: 880;
     }
 
-    .n0 { left: 1008px; top: 176px; }
-    .n1 { left: 704px; top: 232px; }
-    .n2 { left: 296px; top: 690px; }
-    .n3 { left: 880px; top: 360px; }
-    .n4 { left: 988px; top: 690px; }
+    /* Coach notes — positions relative to .coach (which is at root left:386, top:130).
+       Each note is 540×~150px and sits to the LEFT of its QA target inside the task panel
+       (n2 is over the videos). */
+    .n0 { left: 514px; top: 60px;  }   /* points at Invalid button (root y≈210) */
+    .n1 { left: 514px; top: 150px; }   /* left of Q1 (root y≈280) */
+    .n2 { left: 100px; top: 510px; }   /* over videos lower-left (root y≈640) */
+    .n3 { left: 514px; top: 340px; }   /* left of Q2 (root y≈470) */
+    .n4 { left: 514px; top: 740px; }   /* left of Save (root y≈870) */
 
     .highlight {
       position: absolute;
@@ -587,12 +590,12 @@
     }
 
     /* Highlight rectangles in 1920x1080 coordinate space.
-       Computed from the actual layout so each box wraps its target tightly. */
-    .h-invalid { left: 1700px; top: 188px; width: 184px; height: 60px; }
-    .h-q1      { left: 1478px; top: 270px; width: 410px; height: 132px; }
+       Each box wraps its target with ~8px outside margin. */
+    .h-invalid { left: 1668px; top: 184px; width: 206px; height: 66px; }
+    .h-q1      { left: 1470px; top: 248px; width: 408px; height: 154px; }
     .h-play    { left: 52px;   top: 220px; width: 1384px; height: 736px; }
-    .h-q2      { left: 1478px; top: 416px; width: 410px; height: 196px; }
-    .h-save    { left: 1478px; top: 870px; width: 410px; height: 154px; }
+    .h-q2      { left: 1470px; top: 398px; width: 408px; height: 186px; }
+    .h-save    { left: 1470px; top: 864px; width: 408px; height: 168px; }
   </style>
 </head>
 <body>
